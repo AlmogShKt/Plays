@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>מחשבון נדל"ן</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="real-estate-calc.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <!-- Header -->
+      <header class="top-bar">
+        <div class="top-bar-title">
+          <span class="logo-icon">⌂</span>
+          <h1>מחשבון עסקת נדל״ן</h1>
+        </div>
+        <div class="top-bar-actions">
+          <div id="save-status" class="save-status"></div>
+          <button class="btn-action btn-load" onclick="loadFromFile()">
+            <span class="btn-icon">↓</span> טען
+          </button>
+          <button class="btn-action btn-save" onclick="saveToFile()">
+            <span class="btn-icon">⇧</span> שמור
+          </button>
+        </div>
+      </header>
+
+      <div class="layout">
+        <!-- ═══ LEFT: Input Sections ═══ -->
+        <main class="col-inputs">
+          <!-- Purchase -->
+          <section class="card" id="purchase-section">
+            <div class="card-head">
+              <div class="card-title-group">
+                <span class="card-icon">🏠</span>
+                <div>
+                  <h2 class="card-title">עלויות רכישה</h2>
+                  <p class="card-subtitle">מחיר דירה, עו״ד, מס רכישה, תיווך</p>
+                </div>
+              </div>
+              <div class="card-meta">
+                <span class="section-total" id="purchase-total">0 ₪</span>
+                <button
+                  class="btn-add"
+                  onclick="addRow('purchase-list')"
+                  title="הוסף סעיף"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div class="card-body" id="purchase-list">
+              <div class="row-item">
+                <input
+                  type="text"
+                  placeholder="תיאור"
+                  value="מחיר דירה (חוזה)"
+                />
+                <div class="amount-wrap">
+                  <input
+                    type="number"
+                    class="amount"
+                    value="2000000"
+                    oninput="updateAll()"
+                  />
+                  <span class="currency-tag">₪</span>
+                </div>
+                <div class="row-actions">
+                  <button class="btn-move" onclick="moveRow(this,-1)" title="הזז למעלה">▲</button>
+                  <button class="btn-move" onclick="moveRow(this,1)" title="הזז למטה">▼</button>
+                  <span class="row-action-placeholder"></span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Renovation -->
+          <section class="card" id="renovation-section">
+            <div class="card-head">
+              <div class="card-title-group">
+                <span class="card-icon">🔨</span>
+                <div>
+                  <h2 class="card-title">פירוט שיפוץ</h2>
+                  <p class="card-subtitle">מטבח, אמבטיה, ריצוף, חשמל ועוד</p>
+                </div>
+              </div>
+              <div class="card-meta">
+                <span class="section-total" id="renovation-total">0 ₪</span>
+                <button
+                  class="btn-add"
+                  onclick="addRow('renovation-list')"
+                  title="הוסף סעיף"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div class="card-body" id="renovation-list">
+              <div class="row-item">
+                <input type="text" placeholder="תיאור" value="מטבח" />
+                <div class="amount-wrap">
+                  <input
+                    type="number"
+                    class="amount"
+                    value="0"
+                    oninput="updateAll()"
+                  />
+                  <span class="currency-tag">₪</span>
+                </div>
+                <div class="row-actions">
+                  <button class="btn-move" onclick="moveRow(this,-1)" title="הזז למעלה">▲</button>
+                  <button class="btn-move" onclick="moveRow(this,1)" title="הזז למטה">▼</button>
+                  <span class="row-action-placeholder"></span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Equity -->
+          <section class="card" id="equity-section">
+            <div class="card-head">
+              <div class="card-title-group">
+                <span class="card-icon">💰</span>
+                <div>
+                  <h2 class="card-title">מקורות הון עצמי</h2>
+                  <p class="card-subtitle">חיסכון, מתנות, הלוואות פרטיות</p>
+                </div>
+              </div>
+              <div class="card-meta">
+                <span class="section-total" id="equity-total">0 ₪</span>
+                <button
+                  class="btn-add"
+                  onclick="addRow('equity-list')"
+                  title="הוסף סעיף"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div class="card-body" id="equity-list">
+              <div class="row-item">
+                <input type="text" placeholder="מקור הכסף" value="חיסכון" />
+                <div class="amount-wrap">
+                  <input
+                    type="number"
+                    class="amount"
+                    value="500000"
+                    oninput="updateAll()"
+                  />
+                  <span class="currency-tag">₪</span>
+                </div>
+                <div class="row-actions">
+                  <button class="btn-move" onclick="moveRow(this,-1)" title="הזז למעלה">▲</button>
+                  <button class="btn-move" onclick="moveRow(this,1)" title="הזז למטה">▼</button>
+                  <span class="row-action-placeholder"></span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Mortgage simulator -->
+          <section class="card card-mortgage">
+            <div class="card-head">
+              <div class="card-title-group">
+                <span class="card-icon">🏦</span>
+                <div>
+                  <h2 class="card-title">סימולטור משכנתא</h2>
+                  <p class="card-subtitle">חישוב שפיצר — ריבית קבועה</p>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="mortgage-grid">
+                <div class="m-field">
+                  <label for="m_amount">סכום הלוואה</label>
+                  <div class="amount-wrap">
+                    <input
+                      type="number"
+                      id="m_amount"
+                      value="1500000"
+                      oninput="updateAll()"
+                    />
+                    <span class="currency-tag">₪</span>
+                  </div>
+                </div>
+                <div class="m-field">
+                  <label for="m_rate">ריבית שנתית</label>
+                  <div class="amount-wrap">
+                    <input
+                      type="number"
+                      id="m_rate"
+                      value="4.5"
+                      step="0.1"
+                      oninput="updateAll()"
+                    />
+                    <span class="currency-tag">%</span>
+                  </div>
+                </div>
+                <div class="m-field">
+                  <label for="m_years">תקופה</label>
+                  <div class="amount-wrap">
+                    <input
+                      type="number"
+                      id="m_years"
+                      value="30"
+                      oninput="updateAll()"
+                    />
+                    <span class="currency-tag">שנים</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mortgage-results">
+                <div class="m-result-item">
+                  <span class="m-result-label">החזר חודשי</span>
+                  <span class="m-result-value" id="monthly_return">0</span>
+                  <span class="m-result-unit">₪ / חודש</span>
+                </div>
+                <div class="m-result-item">
+                  <span class="m-result-label">סה״כ ריבית</span>
+                  <span class="m-result-value" id="total_interest">0</span>
+                  <span class="m-result-unit">₪</span>
+                </div>
+                <div class="m-result-item">
+                  <span class="m-result-label">סה״כ תשלום</span>
+                  <span class="m-result-value" id="total_repayment">0</span>
+                  <span class="m-result-unit">₪</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Loans -->
+          <section class="card" id="loans-section">
+            <div class="card-head">
+              <div class="card-title-group">
+                <span class="card-icon">💳</span>
+                <div>
+                  <h2 class="card-title">הלוואות</h2>
+                  <p class="card-subtitle">הלוואות שיפוץ, אישיות ועוד</p>
+                </div>
+              </div>
+              <div class="card-meta">
+                <span class="section-total" id="loans-monthly-total">0 ₪/חודש</span>
+                <button
+                  class="btn-add"
+                  onclick="addLoanRow()"
+                  title="הוסף הלוואה"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div class="card-body" id="loans-list">
+              <!-- loan rows added dynamically -->
+            </div>
+          </section>
+        </main>
+
+        <!-- ═══ RIGHT: Summary Panel ═══ -->
+        <aside class="col-summary">
+          <div class="summary-panel">
+            <div class="summary-head">
+              <h2>סיכום עסקה</h2>
+            </div>
+
+            <!-- Costs breakdown -->
+            <div class="summary-group">
+              <div class="summary-group-label">עלויות</div>
+              <div class="summary-row">
+                <span>עלויות רכישה</span>
+                <span class="num" id="sum_purchase">0 ₪</span>
+              </div>
+              <div class="summary-row">
+                <span>שיפוץ</span>
+                <span class="num" id="sum_renovation">0 ₪</span>
+              </div>
+              <div class="summary-row hint-row">
+                <span>תיווך (2% + מע״מ)</span>
+                <span class="num" id="broker_fee">0 ₪</span>
+              </div>
+              <div class="summary-row hint-row">
+                <span>מס רכישה (דירה יחידה)</span>
+                <span class="num" id="purchase_tax">0 ₪</span>
+              </div>
+              <div class="summary-row total-row">
+                <span>סה״כ עלות הפרויקט</span>
+                <span class="num" id="total_cost">0 ₪</span>
+              </div>
+            </div>
+
+            <!-- Bank perspective -->
+            <div class="summary-group">
+              <div class="summary-group-label">נקודת מבט הבנק</div>
+              <div class="summary-row hint-row">
+                <span>מחיר דירה (בסיס LTV)</span>
+                <span class="num" id="apartment_price_display">0 ₪</span>
+              </div>
+              <div class="summary-row hint-row">
+                <span>מקסימום משכנתא (75%)</span>
+                <span class="num" id="total_mortgage">0 ₪</span>
+              </div>
+              <div class="summary-row hint-row">
+                <span>הון עצמי מינימלי (25%)</span>
+                <span class="num" id="min_equity_needed">0 ₪</span>
+              </div>
+              <div class="summary-row hint-row">
+                <span>LTV נוכחי</span>
+                <span class="num" id="ltv_display">0%</span>
+              </div>
+              <div
+                class="summary-row warning-row"
+                id="ltv-warning"
+                style="display: none"
+              >
+                <span>⚠️ חריגה ממגבלת LTV 75% — הבנק לא יאשר</span>
+              </div>
+            </div>
+
+            <!-- What you actually need in cash -->
+            <div class="summary-group">
+              <div class="summary-group-label">הון עצמי נדרש בפועל</div>
+              <div class="summary-row hint-row">
+                <span>25% ממחיר הדירה</span>
+                <span class="num" id="min_equity_needed_2">0 ₪</span>
+              </div>
+              <div class="summary-row hint-row">
+                <span>עלויות מעבר למחיר (שיפוץ, עו״ד...)</span>
+                <span class="num" id="extra_costs">0 ₪</span>
+              </div>
+              <div class="summary-row hint-row" style="color: var(--green);">
+                <span>מימון הלוואות (−)</span>
+                <span class="num" id="loan_deduction" style="color: var(--green);">0 ₪</span>
+              </div>
+              <div class="summary-row total-row">
+                <span>סה״כ מזומן נדרש</span>
+                <span class="num" id="total_cash_needed">0 ₪</span>
+              </div>
+            </div>
+
+            <!-- Funding sources -->
+            <div class="summary-group">
+              <div class="summary-group-label">מקורות מימון</div>
+              <div class="summary-row">
+                <span>הון עצמי</span>
+                <span class="num" id="sum_equity">0 ₪</span>
+              </div>
+              <div class="summary-row">
+                <span>משכנתא</span>
+                <span class="num" id="sum_mortgage">0 ₪</span>
+              </div>
+              <div class="summary-row total-row">
+                <span>סה״כ מימון</span>
+                <span class="num" id="sum_sources">0 ₪</span>
+              </div>
+            </div>
+
+            <!-- Monthly obligations -->
+            <div class="summary-group">
+              <div class="summary-group-label">התחייבויות חודשיות</div>
+              <div class="summary-row hint-row">
+                <span>החזר משכנתא</span>
+                <span class="num" id="mortgage_monthly_summary">0 ₪</span>
+              </div>
+              <div class="summary-row hint-row">
+                <span>החזרי הלוואות</span>
+                <span class="num" id="loans_monthly_summary">0 ₪</span>
+              </div>
+              <div class="summary-row total-row">
+                <span>סה״כ החזר חודשי</span>
+                <span class="num" id="total_monthly_obligations">0 ₪</span>
+              </div>
+            </div>
+
+            <!-- Equity gauge -->
+            <div class="equity-gauge-section">
+              <div class="gauge-header">
+                <span>הון עצמי מתוך הנדרש בפועל</span>
+                <span class="gauge-pct" id="equity-pct">0%</span>
+              </div>
+              <div class="gauge-track">
+                <div
+                  class="gauge-fill"
+                  id="equity-fill"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <div class="gauge-labels">
+                <span id="equity-have">0 ₪</span>
+                <span id="equity-need">מתוך 0 ₪</span>
+              </div>
+            </div>
+
+            <!-- Balance -->
+            <div id="balance-box" class="balance-box positive">
+              <div class="balance-inner">
+                <span class="balance-label">יתרת מזומן בסיום</span>
+                <span id="final_balance" class="balance-val">0 ₪</span>
+              </div>
+              <span class="balance-badge" id="balance-badge">+</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <script src="real-estate-calc.js"></script>
+  </body>
+</html>
