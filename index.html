@@ -21,15 +21,27 @@
         <h2>מחשבון נדל״ן</h2>
         <p class="login-subtitle">הזן פרטי התחברות</p>
         <form id="login-form" onsubmit="handleLogin(event)">
-          <input type="email" id="login-email" placeholder="אימייל" required autocomplete="email" />
-          <input type="password" id="login-password" placeholder="סיסמה" required autocomplete="current-password" />
+          <input
+            type="email"
+            id="login-email"
+            placeholder="אימייל"
+            required
+            autocomplete="email"
+          />
+          <input
+            type="password"
+            id="login-password"
+            placeholder="סיסמה"
+            required
+            autocomplete="current-password"
+          />
           <button type="submit" id="login-btn">התחבר</button>
           <div id="login-error" class="login-error"></div>
         </form>
       </div>
     </div>
 
-    <div class="shell" id="app-shell" style="display:none">
+    <div class="shell" id="app-shell" style="display: none">
       <!-- Header -->
       <header class="top-bar">
         <div class="top-bar-title">
@@ -44,7 +56,11 @@
           <button class="btn-action btn-save" onclick="saveToFile()">
             <span class="btn-icon">⇧</span> שמור
           </button>
-          <button class="btn-action btn-logout" onclick="handleLogout()" title="התנתק">
+          <button
+            class="btn-action btn-logout"
+            onclick="handleLogout()"
+            title="התנתק"
+          >
             <span class="btn-icon">⏻</span> יציאה
           </button>
         </div>
