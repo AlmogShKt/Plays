@@ -2,7 +2,7 @@
   "purchase": [
     {
       "description": "מחיר דירה (חוזה)",
-      "amount": 1250000
+      "amount": 1300000
     },
     {
       "description": "יועץ משכנתאות",
@@ -14,7 +14,7 @@
     },
     {
       "description": "אדריכל",
-      "amount": 15000
+      "amount": 30000
     },
     {
       "description": "שמאות מקדימה",
@@ -27,40 +27,8 @@
       "amount": 6000
     },
     {
-      "description": "מטבח",
-      "amount": 30000
-    },
-    {
-      "description": "תיקונים בדק בית",
-      "amount": 5000
-    },
-    {
-      "description": "רשתות",
-      "amount": 2000
-    },
-    {
-      "description": "לתקן תריסים",
-      "amount": 1000
-    },
-    {
-      "description": "מקלחת",
-      "amount": 2000
-    },
-    {
-      "description": "ריצוף",
-      "amount": 10000
-    },
-    {
-      "description": "יצירת 3 חדרים",
-      "amount": 0
-    },
-    {
-      "description": "חשמל - לסדר קופסה חשמל, להוסיף הארקה ועוד",
-      "amount": 5000
-    },
-    {
-      "description": "הזזת מטבח",
-      "amount": 0
+      "description": "שיפוץ כללי",
+      "amount": 280000
     }
   ],
   "equity": [
@@ -69,35 +37,39 @@
       "amount": 87750
     },
     {
-      "description": "קופת גמל אלמוג לפידות ",
-      "amount": 97000
-    },
-    {
       "description": "קופת גמל מגדל ",
       "amount": 75000
     },
     {
-      "description": "מתנה הורים - משכנתא",
-      "amount": 75000
+      "description": "קופת גמל אלמוג לפידות ",
+      "amount": 97000
     },
     {
-      "description": "מתנה הורים - הוצאות נלוות",
-      "amount": 75000
+      "description": "מתנה הורים - משכנתא",
+      "amount": 150000
     },
     {
       "description": "קרן כספית",
       "amount": 26000
+    },
+    {
+      "description": "דולרים",
+      "amount": 20000
+    },
+    {
+      "description": "פיקדון יוסי",
+      "amount": 15000
     }
   ],
   "mortgage": {
-    "amount": 1250000,
-    "rate": 4.84,
+    "amount": 937000,
+    "rate": 5.25,
     "years": 30
   },
   "loans": [
     {
       "description": "הלוואה שיפוץ",
-      "amount": 81000,
+      "amount": 220000,
       "rate": 5.23,
       "months": 120
     }

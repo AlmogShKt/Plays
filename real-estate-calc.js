@@ -1,8 +1,11 @@
 // ── Config ──
 const STORAGE_KEY = "real_estate_calc_data";
-const API_BASE = "http://localhost:8420";
-const API_SAVE = API_BASE + "/api/save";
-const API_LOAD = API_BASE + "/api/load";
+
+// ── Supabase ──
+const SUPABASE_URL = "https://oieqfraejbnaliflhate.supabase.co";
+const SUPABASE_KEY = "sb_publishable_doZWKR_IStO3u488bkVQ3g_VxsEswV3";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const DOC_ID = "default"; // single-document storage
 
 // ── Row helpers ──
 function addRow(containerId) {
@@ -407,50 +410,57 @@ function loadFromLocalStorage() {
   return false;
 }
 
-async function loadFromServer() {
+async function loadFromSupabase() {
   try {
-    const res = await fetch(API_LOAD);
-    if (res.ok && res.status !== 204) {
-      const text = await res.text();
-      const data = JSON.parse(text);
-      restoreData(data);
+    const { data, error } = await supabase
+      .from("calculator_data")
+      .select("data")
+      .eq("id", DOC_ID)
+      .single();
+    if (error) {
+      console.error("loadFromSupabase error:", error);
+      return false;
+    }
+    if (data && data.data) {
+      restoreData(data.data);
       return true;
     }
   } catch (e) {
-    console.error("loadFromServer failed:", e);
+    console.error("loadFromSupabase failed:", e);
   }
   return false;
 }
 
 async function saveToFile() {
-  const data = collectData();
+  const calcData = collectData();
   try {
-    const res = await fetch(API_SAVE, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    const result = await res.json();
-    if (result.ok) {
-      showSaveStatus("נשמר לקובץ ✓");
+    const { error } = await supabase
+      .from("calculator_data")
+      .upsert(
+        { id: DOC_ID, data: calcData, updated_at: new Date().toISOString() },
+        { onConflict: "id" },
+      );
+    if (!error) {
+      showSaveStatus("נשמר ✓");
     } else {
+      console.error("Save error:", error);
       showSaveStatus("שגיאה בשמירה ✗");
     }
   } catch {
-    showSaveStatus("שגיאה – השרת לא זמין ✗");
+    showSaveStatus("שגיאה בשמירה ✗");
   }
 }
 
 async function loadFromFile() {
   try {
-    const loaded = await loadFromServer();
+    const loaded = await loadFromSupabase();
     if (loaded) {
-      showSaveStatus("נטען מקובץ ✓");
+      showSaveStatus("נטען ✓");
     } else {
       showSaveStatus("אין נתונים שמורים");
     }
   } catch {
-    showSaveStatus("שגיאה – השרת לא זמין ✗");
+    showSaveStatus("שגיאה בטעינה ✗");
   }
 }
 
@@ -465,8 +475,8 @@ function showSaveStatus(msg) {
 
 // ── Init ──
 document.addEventListener("DOMContentLoaded", async () => {
-  // Try server first, then localStorage, then just show defaults
-  const loaded = await loadFromServer();
+  // Try Supabase first, then localStorage, then just show defaults
+  const loaded = await loadFromSupabase();
   if (!loaded) {
     if (!loadFromLocalStorage()) {
       updateAll();
