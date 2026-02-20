@@ -7,6 +7,54 @@ const SUPABASE_KEY = "sb_publishable_doZWKR_IStO3u488bkVQ3g_VxsEswV3";
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const DOC_ID = "default"; // single-document storage
 
+// ── Auth ──
+function showApp() {
+  document.getElementById("login-overlay").style.display = "none";
+  document.getElementById("app-shell").style.display = "";
+}
+
+function showLogin() {
+  document.getElementById("login-overlay").style.display = "";
+  document.getElementById("app-shell").style.display = "none";
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+  const errorEl = document.getElementById("login-error");
+  const btn = document.getElementById("login-btn");
+
+  errorEl.textContent = "";
+  btn.disabled = true;
+  btn.textContent = "מתחבר...";
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  btn.disabled = false;
+  btn.textContent = "התחבר";
+
+  if (error) {
+    errorEl.textContent = "אימייל או סיסמה שגויים";
+    return;
+  }
+
+  showApp();
+  await initApp();
+}
+
+async function handleLogout() {
+  await supabase.auth.signOut();
+  showLogin();
+}
+
+async function checkSession() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return !!session;
+}
+
 // ── Row helpers ──
 function addRow(containerId) {
   const container = document.getElementById(containerId);
@@ -474,12 +522,22 @@ function showSaveStatus(msg) {
 }
 
 // ── Init ──
-document.addEventListener("DOMContentLoaded", async () => {
-  // Try Supabase first, then localStorage, then just show defaults
+async function initApp() {
   const loaded = await loadFromSupabase();
   if (!loaded) {
     if (!loadFromLocalStorage()) {
       updateAll();
     }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  // Check if already logged in
+  const hasSession = await checkSession();
+  if (hasSession) {
+    showApp();
+    await initApp();
+  } else {
+    showLogin();
   }
 });

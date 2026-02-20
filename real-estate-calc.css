@@ -57,6 +57,113 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ── Login Overlay ── */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+}
+
+.login-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 48px 40px 40px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.login-icon {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.login-card h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.login-subtitle {
+  font-size: 14px;
+  color: var(--ink-muted);
+  margin-bottom: 28px;
+}
+
+#login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#login-form input {
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--ink);
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+#login-form input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+#login-btn {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 4px;
+}
+
+#login-btn:hover {
+  background: var(--accent-dark);
+}
+
+#login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-error {
+  font-size: 13px;
+  color: var(--red);
+  min-height: 20px;
+}
+
+.btn-logout {
+  background: transparent !important;
+  border-color: var(--border) !important;
+  color: var(--ink-muted) !important;
+}
+
+.btn-logout:hover {
+  color: var(--red) !important;
+  border-color: var(--red-light) !important;
+  background: var(--red-light) !important;
+}
+
 /* ── Shell ── */
 .shell {
   max-width: 1280px;
