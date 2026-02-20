@@ -4,7 +4,7 @@ const STORAGE_KEY = "real_estate_calc_data";
 // ── Supabase ──
 const SUPABASE_URL = "https://oieqfraejbnaliflhate.supabase.co";
 const SUPABASE_KEY = "sb_publishable_doZWKR_IStO3u488bkVQ3g_VxsEswV3";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const DOC_ID = "default"; // single-document storage
 
 // ── Auth ──
@@ -29,29 +29,32 @@ async function handleLogin(e) {
   btn.disabled = true;
   btn.textContent = "מתחבר...";
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await sb.auth.signInWithPassword({ email, password });
 
   btn.disabled = false;
   btn.textContent = "התחבר";
 
   if (error) {
+    console.error("Login error:", error);
     errorEl.textContent = "אימייל או סיסמה שגויים";
     return;
   }
 
+  console.log("Login successful");
   showApp();
   await initApp();
 }
 
 async function handleLogout() {
-  await supabase.auth.signOut();
+  await sb.auth.signOut();
   showLogin();
 }
 
 async function checkSession() {
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await sb.auth.getSession();
+  console.log("Session check:", session ? "active" : "none");
   return !!session;
 }
 
@@ -460,7 +463,8 @@ function loadFromLocalStorage() {
 
 async function loadFromSupabase() {
   try {
-    const { data, error } = await supabase
+    console.log("Loading data from Supabase...");
+    const { data, error } = await sb
       .from("calculator_data")
       .select("data")
       .eq("id", DOC_ID)
@@ -470,9 +474,11 @@ async function loadFromSupabase() {
       return false;
     }
     if (data && data.data) {
+      console.log("Data loaded successfully", data.data);
       restoreData(data.data);
       return true;
     }
+    console.log("No data found in Supabase");
   } catch (e) {
     console.error("loadFromSupabase failed:", e);
   }
@@ -482,7 +488,7 @@ async function loadFromSupabase() {
 async function saveToFile() {
   const calcData = collectData();
   try {
-    const { error } = await supabase
+    const { error } = await sb
       .from("calculator_data")
       .upsert(
         { id: DOC_ID, data: calcData, updated_at: new Date().toISOString() },
@@ -523,21 +529,26 @@ function showSaveStatus(msg) {
 
 // ── Init ──
 async function initApp() {
+  console.log("initApp: loading data...");
   const loaded = await loadFromSupabase();
   if (!loaded) {
+    console.log("Supabase load failed, trying localStorage...");
     if (!loadFromLocalStorage()) {
+      console.log("No saved data found, using defaults");
       updateAll();
     }
   }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Check if already logged in
+  console.log("DOM ready, checking session...");
   const hasSession = await checkSession();
   if (hasSession) {
+    console.log("Session found, showing app");
     showApp();
     await initApp();
   } else {
+    console.log("No session, showing login");
     showLogin();
   }
 });
