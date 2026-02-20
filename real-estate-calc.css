@@ -441,7 +441,7 @@ body {
 }
 
 #loans-section .card-body:empty::after {
-  content: 'לחצו + להוסיף הלוואה';
+  content: "לחצו + להוסיף הלוואה";
   display: block;
   text-align: center;
   padding: 20px;

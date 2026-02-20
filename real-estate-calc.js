@@ -55,7 +55,7 @@ function escapeHtml(str) {
 
 // ── Row reorder ──
 function moveRow(btn, direction) {
-  const row = btn.closest('.row-item');
+  const row = btn.closest(".row-item");
   if (!row) return;
   const container = row.parentElement;
   if (direction === -1 && row.previousElementSibling) {
@@ -68,14 +68,14 @@ function moveRow(btn, direction) {
 
 // ── Loan helpers ──
 function addLoanRow() {
-  addLoanRowWithData('', 0, 4.5, 60);
+  addLoanRowWithData("", 0, 4.5, 60);
   updateAll();
 }
 
 function addLoanRowWithData(description, amount, rate, months) {
-  const container = document.getElementById('loans-list');
-  const div = document.createElement('div');
-  div.className = 'loan-row';
+  const container = document.getElementById("loans-list");
+  const div = document.createElement("div");
+  div.className = "loan-row";
   div.innerHTML = `
     <div class="loan-row-header">
       <input type="text" class="loan-desc" placeholder="תיאור הלוואה" value="${escapeHtml(description)}">
@@ -120,23 +120,23 @@ function calculateLoanPayment(amount, annualRate, months) {
 }
 
 function collectLoanRows() {
-  const rows = document.querySelectorAll('#loans-list .loan-row');
+  const rows = document.querySelectorAll("#loans-list .loan-row");
   const data = [];
-  rows.forEach(row => {
+  rows.forEach((row) => {
     data.push({
-      description: row.querySelector('.loan-desc')?.value || '',
-      amount: parseFloat(row.querySelector('.loan-amount')?.value) || 0,
-      rate: parseFloat(row.querySelector('.loan-rate')?.value) || 0,
-      months: parseFloat(row.querySelector('.loan-months')?.value) || 0,
+      description: row.querySelector(".loan-desc")?.value || "",
+      amount: parseFloat(row.querySelector(".loan-amount")?.value) || 0,
+      rate: parseFloat(row.querySelector(".loan-rate")?.value) || 0,
+      months: parseFloat(row.querySelector(".loan-months")?.value) || 0,
     });
   });
   return data;
 }
 
 function restoreLoanSection(loans) {
-  const container = document.getElementById('loans-list');
-  container.innerHTML = '';
-  loans.forEach(loan => {
+  const container = document.getElementById("loans-list");
+  container.innerHTML = "";
+  loans.forEach((loan) => {
     addLoanRowWithData(loan.description, loan.amount, loan.rate, loan.months);
   });
 }
@@ -186,8 +186,9 @@ function updateAll() {
 
   // ── Sum of all loan principal amounts ──
   let totalLoanAmounts = 0;
-  document.querySelectorAll('#loans-list .loan-row').forEach(row => {
-    totalLoanAmounts += parseFloat(row.querySelector('.loan-amount')?.value) || 0;
+  document.querySelectorAll("#loans-list .loan-row").forEach((row) => {
+    totalLoanAmounts +=
+      parseFloat(row.querySelector(".loan-amount")?.value) || 0;
   });
 
   // ── Bank limits: LTV is on apartment price, NOT total cost ──
@@ -288,21 +289,27 @@ function updateAll() {
 
   // ── Loan results ──
   let totalLoanMonthly = 0;
-  document.querySelectorAll('#loans-list .loan-row').forEach(row => {
-    const lAmount = parseFloat(row.querySelector('.loan-amount')?.value) || 0;
-    const lRate = parseFloat(row.querySelector('.loan-rate')?.value) || 0;
-    const lMonths = parseFloat(row.querySelector('.loan-months')?.value) || 0;
+  document.querySelectorAll("#loans-list .loan-row").forEach((row) => {
+    const lAmount = parseFloat(row.querySelector(".loan-amount")?.value) || 0;
+    const lRate = parseFloat(row.querySelector(".loan-rate")?.value) || 0;
+    const lMonths = parseFloat(row.querySelector(".loan-months")?.value) || 0;
     const payment = calculateLoanPayment(lAmount, lRate, lMonths);
-    const paymentEl = row.querySelector('.loan-payment');
+    const paymentEl = row.querySelector(".loan-payment");
     if (paymentEl) paymentEl.textContent = fmt(Math.round(payment));
     totalLoanMonthly += payment;
   });
-  setText('loans-monthly-total', fmtShort(Math.round(totalLoanMonthly)) + ' ₪/חודש');
+  setText(
+    "loans-monthly-total",
+    fmtShort(Math.round(totalLoanMonthly)) + " ₪/חודש",
+  );
 
   // ── Monthly obligations summary ──
-  setText('mortgage_monthly_summary', fmt(Math.round(monthly)));
-  setText('loans_monthly_summary', fmt(Math.round(totalLoanMonthly)));
-  setText('total_monthly_obligations', fmt(Math.round(monthly + totalLoanMonthly)));
+  setText("mortgage_monthly_summary", fmt(Math.round(monthly)));
+  setText("loans_monthly_summary", fmt(Math.round(totalLoanMonthly)));
+  setText(
+    "total_monthly_obligations",
+    fmt(Math.round(monthly + totalLoanMonthly)),
+  );
 }
 
 // ── Purchase tax calculation (דירה יחידה, מדרגות 16.1.2024–15.1.2028) ──
