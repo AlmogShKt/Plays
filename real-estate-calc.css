@@ -261,6 +261,7 @@ body {
   }
   .col-summary {
     order: -1;
+    position: static;
   }
 }
 
