@@ -354,7 +354,10 @@
                 <span class="num" id="sum_renovation">0 ₪</span>
               </div>
               <div class="summary-row hint-row">
-                <span>תיווך (2% + מע״מ)</span>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                  <input type="checkbox" id="broker-toggle" checked onchange="updateAll()" />
+                  <span>תיווך (2% + מע״מ)</span>
+                </label>
                 <span class="num" id="broker_fee">0 ₪</span>
               </div>
               <div class="summary-row hint-row">

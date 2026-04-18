@@ -231,7 +231,8 @@ function updateAll() {
       document.querySelector("#purchase-list .row-item .amount")?.value,
     ) || 0;
 
-  const brokerFee = apartmentPrice * 0.02 * 1.18;
+  const brokerToggle = document.getElementById("broker-toggle");
+  const brokerFee = brokerToggle && brokerToggle.checked ? apartmentPrice * 0.02 * 1.18 : 0;
   // ── Purchase tax estimate (דירה יחידה, מדרגות 2024-2028) ──
   const purchaseTax = calcPurchaseTax(apartmentPrice);
 
