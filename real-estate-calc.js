@@ -9,6 +9,13 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ── Apartment state (multi-scenario) ──
 let apartments = []; // [{ id, name, data }]
 let currentId = null;
+let sharedEquity = []; // shared funding pool: [{ description, amount }]
+const SHARED_ID = "__shared__";
+const SHARED_STORAGE_KEY = "real_estate_calc_shared_equity";
+
+function sharedEquityTotal() {
+  return sharedEquity.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+}
 
 function genId() {
   return "apt_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
@@ -20,9 +27,10 @@ function blankData() {
   return {
     purchase: [{ description: "מחיר דירה (חוזה)", amount: 0 }],
     renovation: [{ description: "שיפוץ", amount: 0 }],
-    equity: [{ description: "חיסכון", amount: 0 }],
     mortgage: { amount: 0, rate: 4.5, years: 30 },
     loans: [],
+    equityAllocated: 0,
+    monthlyRent: 0,
     brokerEnabled: true,
     lawyerEnabled: true,
   };
@@ -236,7 +244,8 @@ function computeMetrics(data) {
 
   const purchaseSum = sumArr(data.purchase);
   const renoSum = sumArr(data.renovation);
-  const equitySum = sumArr(data.equity);
+  // Equity used by THIS apartment = amount allocated from the shared pool
+  const equitySum = parseFloat(data.equityAllocated) || 0;
 
   const mortgage = data.mortgage || {};
   const mortgageSum = parseFloat(mortgage.amount) || 0;
@@ -277,6 +286,14 @@ function computeMetrics(data) {
   });
   const totalMonthly = monthlyMortgage + totalLoanMonthly;
 
+  // ── Rental & yearly profit ──
+  const monthlyRent = parseFloat(data.monthlyRent) || 0;
+  const annualRent = monthlyRent * 12;
+  const annualFinancing = totalMonthly * 12;
+  const yearlyProfit = annualRent - annualFinancing;
+  const monthlyCashFlow = monthlyRent - totalMonthly;
+  const grossYield = apartmentPrice > 0 ? (annualRent / apartmentPrice) * 100 : 0;
+
   return {
     purchaseSum, renoSum, equitySum, mortgageSum, apartmentPrice,
     brokerFee, purchaseTax, totalCost, totalSources, totalLoanAmounts,
@@ -284,6 +301,7 @@ function computeMetrics(data) {
     maxMortgage, minEquityForBank, extraCosts, totalCashNeeded, balance,
     currentLTV, ltvOk, monthlyMortgage, totalInterest, totalRepay,
     totalLoanMonthly, totalMonthly,
+    monthlyRent, annualRent, annualFinancing, yearlyProfit, monthlyCashFlow, grossYield,
   };
 }
 
@@ -294,6 +312,7 @@ function setText(id, value) {
 
 // ── Render live view from current DOM ──
 function updateAll() {
+  syncSharedEquityFromDOM();
   const data = collectData();
   const m = computeMetrics(data);
   const fmt = (n) => Math.round(n).toLocaleString() + " ₪";
@@ -301,7 +320,14 @@ function updateAll() {
 
   setText("purchase-total", fmt(m.purchaseSum));
   setText("renovation-total", fmt(m.renoSum));
-  setText("equity-total", fmt(m.equitySum));
+  setText("equity-total", fmt(sharedEquityTotal()));
+
+  // ── Shared pool allocation ──
+  setText("equity-pool-total", fmt(sharedEquityTotal()));
+  const remaining = sharedEquityTotal() - m.equitySum;
+  setText("equity-remaining", fmt(remaining));
+  const remEl = document.getElementById("equity-remaining");
+  if (remEl) remEl.className = "num " + (remaining < 0 ? "num-warn" : "");
 
   setText("sum_purchase", fmt(m.purchaseSum));
   setText("sum_renovation", fmt(m.renoSum));
@@ -367,6 +393,25 @@ function updateAll() {
   setText("mortgage_monthly_summary", fmt(Math.round(m.monthlyMortgage)));
   setText("loans_monthly_summary", fmt(Math.round(m.totalLoanMonthly)));
   setText("total_monthly_obligations", fmt(Math.round(m.totalMonthly)));
+
+  // ── Rental & yearly profit ──
+  setText("annual_rent", fmt(m.annualRent));
+  setText("annual_financing", fmt(m.annualFinancing));
+  setText("yearly_profit", fmt(m.yearlyProfit));
+  setText("monthly_cashflow", fmt(m.monthlyCashFlow));
+  setText("gross_yield", m.grossYield.toFixed(2) + "%");
+  setText("sum_yearly_profit", fmt(m.yearlyProfit));
+  ["yearly_profit", "monthly_cashflow", "sum_yearly_profit"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("num-negative", m.yearlyProfit < 0 && id !== "monthly_cashflow");
+  });
+  const cfEl = document.getElementById("monthly_cashflow");
+  if (cfEl) cfEl.classList.toggle("num-negative", m.monthlyCashFlow < 0);
+  const ypEl = document.getElementById("yearly_profit");
+  if (ypEl) {
+    ypEl.classList.toggle("num-positive", m.yearlyProfit >= 0);
+    ypEl.classList.toggle("num-negative", m.yearlyProfit < 0);
+  }
 }
 
 // ── Collect / Restore data ──
@@ -391,16 +436,33 @@ function collectData() {
   return {
     purchase: collectSectionRows("purchase-list"),
     renovation: collectSectionRows("renovation-list"),
-    equity: collectSectionRows("equity-list"),
     mortgage: {
       amount: parseFloat(document.getElementById("m_amount").value) || 0,
       rate: parseFloat(document.getElementById("m_rate").value) || 0,
       years: parseFloat(document.getElementById("m_years").value) || 0,
     },
     loans: collectLoanRows(),
+    equityAllocated: parseFloat(document.getElementById("equity-allocated")?.value) || 0,
+    monthlyRent: parseFloat(document.getElementById("monthly-rent")?.value) || 0,
     brokerEnabled: brokerToggle ? brokerToggle.checked : true,
     lawyerEnabled: lawyerToggle ? lawyerToggle.checked : true,
   };
+}
+
+// ── Shared funding pool (global, not per-apartment) ──
+function syncSharedEquityFromDOM() {
+  const container = document.getElementById("equity-list");
+  if (!container) return;
+  sharedEquity = collectSectionRows("equity-list");
+  mirrorSharedToLocalStorage();
+}
+
+function useAllEquity() {
+  const inp = document.getElementById("equity-allocated");
+  if (inp) {
+    inp.value = Math.round(sharedEquityTotal());
+    updateAll();
+  }
 }
 
 function restoreSection(containerId, rows) {
@@ -416,7 +478,13 @@ function restoreData(data) {
 
   restoreSection("purchase-list", data.purchase && data.purchase.length ? data.purchase : blankData().purchase);
   restoreSection("renovation-list", data.renovation || []);
-  restoreSection("equity-list", data.equity || []);
+  // Equity list = the SHARED pool (same for every apartment)
+  restoreSection("equity-list", sharedEquity);
+
+  const allocEl = document.getElementById("equity-allocated");
+  if (allocEl) allocEl.value = data.equityAllocated || 0;
+  const rentEl = document.getElementById("monthly-rent");
+  if (rentEl) rentEl.value = data.monthlyRent || 0;
 
   const mortgage = data.mortgage || {};
   document.getElementById("m_amount").value = mortgage.amount || 0;
@@ -436,6 +504,7 @@ function restoreData(data) {
 
 // ── Apartment persistence (Supabase rows) ──
 function saveCurrentToMemory() {
+  syncSharedEquityFromDOM();
   const ap = currentApartment();
   if (ap) ap.data = collectData();
 }
@@ -450,11 +519,14 @@ async function loadApartments() {
       console.error("loadApartments error:", error);
       return false;
     }
-    apartments = (data || []).map((r) => ({
-      id: r.id,
-      name: r.name || "דירה",
-      data: r.data || {},
-    }));
+    const rows = data || [];
+    const sh = rows.find((r) => r.id === SHARED_ID);
+    if (sh && sh.data && Array.isArray(sh.data.equity)) {
+      sharedEquity = sh.data.equity;
+    }
+    apartments = rows
+      .filter((r) => r.id !== SHARED_ID)
+      .map((r) => ({ id: r.id, name: r.name || "דירה", data: r.data || {} }));
     mirrorToLocalStorage();
     return true;
   } catch (e) {
@@ -474,6 +546,25 @@ async function saveApartment(ap) {
   } catch {
     return false;
   }
+}
+
+async function saveShared() {
+  try {
+    const { error } = await sb.from("calculator_data").upsert(
+      { id: SHARED_ID, name: "__shared__", data: { equity: sharedEquity }, updated_at: new Date().toISOString() },
+      { onConflict: "id" },
+    );
+    mirrorSharedToLocalStorage();
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+function mirrorSharedToLocalStorage() {
+  try {
+    localStorage.setItem(SHARED_STORAGE_KEY, JSON.stringify(sharedEquity));
+  } catch {}
 }
 
 async function deleteApartmentRow(id) {
@@ -530,6 +621,7 @@ async function switchApartment(id) {
   if (id === currentId) return;
   saveCurrentToMemory();
   await saveApartment(currentApartment());
+  await saveShared();
   currentId = id;
   renderTabs();
   restoreData(currentApartment().data);
@@ -538,6 +630,7 @@ async function switchApartment(id) {
 async function addApartment() {
   saveCurrentToMemory();
   await saveApartment(currentApartment());
+  await saveShared();
   const ap = { id: genId(), name: "דירה " + (apartments.length + 1), data: blankData() };
   apartments.push(ap);
   currentId = ap.id;
@@ -599,7 +692,7 @@ function openCompare() {
     { label: "תיווך", key: "brokerFee", better: "low" },
     { label: "עו״ד", key: "lawyerFee", better: "low" },
     { label: "סה״כ עלות הפרויקט", key: "totalCost", better: "low" },
-    { label: "הון עצמי", key: "equitySum", better: "high" },
+    { label: "הון עצמי מוקצה", key: "equitySum", better: null },
     { label: "משכנתא", key: "mortgageSum", better: null },
     { label: "מקס׳ משכנתא (75%)", key: "maxMortgage", better: null },
     { label: "סה״כ מזומן נדרש", key: "totalCashNeeded", better: "low" },
@@ -607,6 +700,10 @@ function openCompare() {
     { label: "החזר משכנתא חודשי", key: "monthlyMortgage", better: "low" },
     { label: "החזרי הלוואות חודשי", key: "totalLoanMonthly", better: "low" },
     { label: "סה״כ החזר חודשי", key: "totalMonthly", better: "low" },
+    { label: "שכר דירה חודשי", key: "monthlyRent", better: "high" },
+    { label: "תזרים חודשי (שכ״ד − החזר)", key: "monthlyCashFlow", better: "high" },
+    { label: "רווח שנתי", key: "yearlyProfit", better: "high" },
+    { label: "תשואה ברוטו", key: "grossYield", better: "high", pct: true },
     { label: "LTV", key: "currentLTV", better: null, pct: true },
   ];
 
@@ -667,7 +764,8 @@ async function saveToFile() {
   const ap = currentApartment();
   if (!ap) return;
   const ok = await saveApartment(ap);
-  showSaveStatus(ok ? "נשמר ✓" : "שגיאה בשמירה ✗");
+  const okShared = await saveShared();
+  showSaveStatus(ok && okShared ? "נשמר ✓" : "שגיאה בשמירה ✗");
 }
 
 async function loadFromFile() {
@@ -691,6 +789,32 @@ function showSaveStatus(msg) {
   }, 3000);
 }
 
+// ── Migration: split legacy per-apartment equity into a shared pool ──
+function migrateSharedEquity() {
+  const hasShared = Array.isArray(sharedEquity) && sharedEquity.length > 0;
+  if (!hasShared) {
+    const legacy = apartments.find(
+      (a) => Array.isArray(a.data.equity) && a.data.equity.length > 0,
+    );
+    if (legacy) {
+      sharedEquity = legacy.data.equity.map((r) => ({
+        description: r.description,
+        amount: parseFloat(r.amount) || 0,
+      }));
+    }
+  }
+  apartments.forEach((a) => {
+    if (a.data.equityAllocated == null) {
+      const legacySum = Array.isArray(a.data.equity)
+        ? a.data.equity.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0)
+        : 0;
+      a.data.equityAllocated = legacySum || sharedEquityTotal();
+    }
+    if (a.data.monthlyRent == null) a.data.monthlyRent = 0;
+    delete a.data.equity; // no longer stored per-apartment
+  });
+}
+
 // ── Init ──
 async function initApp() {
   const ok = await loadApartments();
@@ -706,6 +830,14 @@ async function initApp() {
     const ap = { id: "default", name: "דירה 1", data: blankData() };
     apartments = [ap];
     await saveApartment(ap);
+  }
+  const needMigration = apartments.some(
+    (a) => a.data.equityAllocated == null || Array.isArray(a.data.equity),
+  );
+  migrateSharedEquity();
+  if (needMigration) {
+    await saveShared();
+    for (const a of apartments) await saveApartment(a);
   }
   currentId = apartments[0].id;
   renderTabs();

@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="real-estate-calc.css?v=2" />
+    <link rel="stylesheet" href="real-estate-calc.css?v=3" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   </head>
   <body>
@@ -193,8 +193,8 @@
               <div class="card-title-group">
                 <span class="card-icon">💰</span>
                 <div>
-                  <h2 class="card-title">מקורות הון עצמי</h2>
-                  <p class="card-subtitle">חיסכון, מתנות, הלוואות פרטיות</p>
+                  <h2 class="card-title">מקורות הון עצמי <span class="shared-badge">משותף</span></h2>
+                  <p class="card-subtitle">משותף לכל הדירות — עריכה משפיעה על כולן</p>
                 </div>
               </div>
               <div class="card-meta">
@@ -236,6 +236,66 @@
                     ▼
                   </button>
                   <span class="row-action-placeholder"></span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Allocation + Rental for THIS apartment -->
+          <section class="card" id="allocation-section">
+            <div class="card-head">
+              <div class="card-title-group">
+                <span class="card-icon">🎯</span>
+                <div>
+                  <h2 class="card-title">הקצאה ותשואה לדירה זו</h2>
+                  <p class="card-subtitle">כמה הון עצמי להשקיע כאן ושכר דירה צפוי</p>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="alloc-grid">
+                <div class="m-field">
+                  <label for="equity-allocated">הון עצמי מוקצה לדירה זו</label>
+                  <div class="amount-wrap">
+                    <input type="number" id="equity-allocated" value="0" oninput="updateAll()" />
+                    <span class="currency-tag">₪</span>
+                  </div>
+                  <button type="button" class="btn-inline" onclick="useAllEquity()">השתמש בכל ההון (<span id="equity-pool-total">0 ₪</span>)</button>
+                </div>
+                <div class="m-field">
+                  <label>נותר מהפול לאחר הקצאה</label>
+                  <div class="alloc-readout">
+                    <span class="num" id="equity-remaining">0 ₪</span>
+                  </div>
+                </div>
+                <div class="m-field">
+                  <label for="monthly-rent">שכר דירה חודשי צפוי</label>
+                  <div class="amount-wrap">
+                    <input type="number" id="monthly-rent" value="0" oninput="updateAll()" />
+                    <span class="currency-tag">₪</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mortgage-results">
+                <div class="m-result-item">
+                  <span class="m-result-label">הכנסה שנתית</span>
+                  <span class="m-result-value" id="annual_rent">0 ₪</span>
+                </div>
+                <div class="m-result-item">
+                  <span class="m-result-label">עלות מימון שנתית</span>
+                  <span class="m-result-value" id="annual_financing">0 ₪</span>
+                </div>
+                <div class="m-result-item">
+                  <span class="m-result-label">רווח שנתי</span>
+                  <span class="m-result-value" id="yearly_profit">0 ₪</span>
+                </div>
+                <div class="m-result-item">
+                  <span class="m-result-label">תזרים חודשי</span>
+                  <span class="m-result-value" id="monthly_cashflow">0 ₪</span>
+                </div>
+                <div class="m-result-item">
+                  <span class="m-result-label">תשואה ברוטו</span>
+                  <span class="m-result-value" id="gross_yield">0%</span>
                 </div>
               </div>
             </div>
@@ -441,7 +501,7 @@
             <div class="summary-group">
               <div class="summary-group-label">מקורות מימון</div>
               <div class="summary-row">
-                <span>הון עצמי</span>
+                <span>הון עצמי (מוקצה)</span>
                 <span class="num" id="sum_equity">0 ₪</span>
               </div>
               <div class="summary-row">
@@ -468,6 +528,15 @@
               <div class="summary-row total-row">
                 <span>סה״כ החזר חודשי</span>
                 <span class="num" id="total_monthly_obligations">0 ₪</span>
+              </div>
+            </div>
+
+            <!-- Rental / yearly profit -->
+            <div class="summary-group">
+              <div class="summary-group-label">תשואה שנתית</div>
+              <div class="summary-row total-row">
+                <span>רווח שנתי (שכ״ד − מימון)</span>
+                <span class="num" id="sum_yearly_profit">0 ₪</span>
               </div>
             </div>
 
@@ -514,6 +583,6 @@
       </div>
     </div>
 
-    <script src="real-estate-calc.js?v=2"></script>
+    <script src="real-estate-calc.js?v=3"></script>
   </body>
 </html>

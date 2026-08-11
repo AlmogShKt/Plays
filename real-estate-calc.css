@@ -1051,6 +1051,61 @@ body {
   text-align: center;
 }
 
+/* Shared pool badge + allocation/rental card */
+.shared-badge {
+  font-size: 0.6em;
+  font-weight: 700;
+  vertical-align: middle;
+  background: var(--teal-light);
+  color: var(--teal);
+  border: 1px solid var(--teal-surface);
+  border-radius: 100px;
+  padding: 2px 8px;
+  margin-inline-start: 6px;
+}
+.alloc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.alloc-readout {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  font-size: 1.05em;
+  font-weight: 700;
+}
+.btn-inline {
+  margin-top: 6px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-family: var(--font-body);
+  font-size: 0.75em;
+  font-weight: 600;
+  color: var(--teal);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-inline:hover {
+  border-color: var(--teal);
+  background: var(--teal-light);
+}
+.num-positive {
+  color: var(--green);
+}
+.num-negative {
+  color: var(--red);
+}
+
+@media (max-width: 640px) {
+  .alloc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .compare-overlay {
     padding: 10px;
