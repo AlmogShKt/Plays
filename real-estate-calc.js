@@ -24,6 +24,7 @@ function blankData() {
     mortgage: { amount: 0, rate: 4.5, years: 30 },
     loans: [],
     brokerEnabled: true,
+    lawyerEnabled: true,
   };
 }
 
@@ -245,9 +246,11 @@ function computeMetrics(data) {
   const apartmentPrice = parseFloat(data.purchase && data.purchase[0] && data.purchase[0].amount) || 0;
   const brokerEnabled = data.brokerEnabled !== false; // default ON
   const brokerFee = brokerEnabled ? apartmentPrice * 0.02 * 1.18 : 0;
+  const lawyerEnabled = data.lawyerEnabled !== false; // default ON
+  const lawyerFee = lawyerEnabled ? apartmentPrice * 0.005 * 1.18 : 0;
   const purchaseTax = calcPurchaseTax(apartmentPrice);
 
-  const totalCost = purchaseSum + renoSum + brokerFee + purchaseTax;
+  const totalCost = purchaseSum + renoSum + brokerFee + lawyerFee + purchaseTax;
   const totalSources = equitySum + mortgageSum;
   const totalLoanAmounts = sumArr(data.loans);
 
@@ -277,6 +280,7 @@ function computeMetrics(data) {
   return {
     purchaseSum, renoSum, equitySum, mortgageSum, apartmentPrice,
     brokerFee, purchaseTax, totalCost, totalSources, totalLoanAmounts,
+    lawyerFee,
     maxMortgage, minEquityForBank, extraCosts, totalCashNeeded, balance,
     currentLTV, ltvOk, monthlyMortgage, totalInterest, totalRepay,
     totalLoanMonthly, totalMonthly,
@@ -302,6 +306,7 @@ function updateAll() {
   setText("sum_purchase", fmt(m.purchaseSum));
   setText("sum_renovation", fmt(m.renoSum));
   setText("broker_fee", fmt(m.brokerFee));
+  setText("lawyer_fee", fmt(m.lawyerFee));
   setText("purchase_tax", fmt(m.purchaseTax));
   setText("total_cost", fmt(m.totalCost));
 
@@ -382,6 +387,7 @@ function collectSectionRows(containerId) {
 
 function collectData() {
   const brokerToggle = document.getElementById("broker-toggle");
+  const lawyerToggle = document.getElementById("lawyer-toggle");
   return {
     purchase: collectSectionRows("purchase-list"),
     renovation: collectSectionRows("renovation-list"),
@@ -393,6 +399,7 @@ function collectData() {
     },
     loans: collectLoanRows(),
     brokerEnabled: brokerToggle ? brokerToggle.checked : true,
+    lawyerEnabled: lawyerToggle ? lawyerToggle.checked : true,
   };
 }
 
@@ -420,6 +427,9 @@ function restoreData(data) {
 
   const bt = document.getElementById("broker-toggle");
   if (bt) bt.checked = data.brokerEnabled !== false;
+
+  const lt = document.getElementById("lawyer-toggle");
+  if (lt) lt.checked = data.lawyerEnabled !== false;
 
   updateAll();
 }
@@ -587,6 +597,7 @@ function openCompare() {
     { label: "מחיר דירה", key: "apartmentPrice", better: "low" },
     { label: "מס רכישה", key: "purchaseTax", better: "low" },
     { label: "תיווך", key: "brokerFee", better: "low" },
+    { label: "עו״ד", key: "lawyerFee", better: "low" },
     { label: "סה״כ עלות הפרויקט", key: "totalCost", better: "low" },
     { label: "הון עצמי", key: "equitySum", better: "high" },
     { label: "משכנתא", key: "mortgageSum", better: null },

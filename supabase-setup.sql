@@ -55,6 +55,11 @@ UPDATE calculator_data
   SET data = jsonb_set(data, '{brokerEnabled}', 'true', true)
   WHERE NOT (data ? 'brokerEnabled');
 
+-- 5c. Ensure lawyerEnabled flag exists in existing rows
+UPDATE calculator_data
+  SET data = jsonb_set(data, '{lawyerEnabled}', 'true', true)
+  WHERE NOT (data ? 'lawyerEnabled');
+
 -- 6. Seed a first apartment if the table is completely empty
 INSERT INTO calculator_data (id, name, data)
 SELECT
@@ -85,6 +90,7 @@ SELECT
     "loans": [
       {"description": "הלוואה שיפוץ", "amount": 0, "rate": 5.23, "months": 120}
     ],
-    "brokerEnabled": true
+    "brokerEnabled": true,
+    "lawyerEnabled": true
   }'::jsonb
 WHERE NOT EXISTS (SELECT 1 FROM calculator_data);
