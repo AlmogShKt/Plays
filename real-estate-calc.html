@@ -50,6 +50,9 @@
         </div>
         <div class="top-bar-actions">
           <div id="save-status" class="save-status"></div>
+          <button class="btn-action btn-compare" onclick="openCompare()" title="השווה דירות">
+            <span class="btn-icon">⇄</span> השוואה
+          </button>
           <button class="btn-action btn-load" onclick="loadFromFile()">
             <span class="btn-icon">↓</span> טען
           </button>
@@ -65,6 +68,9 @@
           </button>
         </div>
       </header>
+
+      <!-- Apartment tabs -->
+      <div class="apt-tabs-bar" id="apartment-tabs"></div>
 
       <div class="layout">
         <!-- ═══ LEFT: Input Sections ═══ -->
@@ -354,7 +360,10 @@
                 <span class="num" id="sum_renovation">0 ₪</span>
               </div>
               <div class="summary-row hint-row">
-                <span>תיווך (2% + מע״מ)</span>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                  <input type="checkbox" id="broker-toggle" checked onchange="updateAll()" />
+                  <span>תיווך (2% + מע״מ)</span>
+                </label>
                 <span class="num" id="broker_fee">0 ₪</span>
               </div>
               <div class="summary-row hint-row">
@@ -484,6 +493,17 @@
             </div>
           </div>
         </aside>
+      </div>
+    </div>
+
+    <!-- Compare modal -->
+    <div id="compare-overlay" class="compare-overlay" style="display: none">
+      <div class="compare-modal">
+        <div class="compare-head">
+          <h2>השוואת דירות</h2>
+          <button class="compare-close" onclick="closeCompare()" title="סגור">×</button>
+        </div>
+        <div id="compare-body" class="compare-modal-body"></div>
       </div>
     </div>
 

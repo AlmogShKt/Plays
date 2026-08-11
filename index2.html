@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>מחשבון החלטה להשקעה</title>
+    <style>
+      :root {
+        --bg: #0f172a; /* slate-900 */
+        --card: #111827; /* gray-900 */
+        --muted: #9ca3af; /* gray-400 */
+        --text: #e5e7eb; /* gray-200 */
+        --accent: #22c55e; /* green-500 */
+        --accent2: #3b82f6; /* blue-500 */
+        --danger: #ef4444;
+        --border: #1f2937; /* gray-800 */
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, #020617, #0b1220);
+        color: var(--text);
+        font-family: Inter, system-ui, Arial;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+      .sub {
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 800px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(6px);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+      .card h3 {
+        margin: 0 0 8px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .field {
+        margin-top: 10px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #020617;
+        color: var(--text);
+        outline: none;
+      }
+      input[type="number"]:focus {
+        border-color: var(--accent2);
+      }
+
+      .checks {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #020617;
+        border: 1px solid var(--border);
+        padding: 6px 10px;
+        border-radius: 999px;
+      }
+
+      .result {
+        margin-top: 12px;
+        border-top: 1px dashed var(--border);
+        padding-top: 10px;
+        line-height: 1.8;
+      }
+      .pill {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #020617;
+        border: 1px solid var(--border);
+        margin-left: 6px;
+      }
+      .good {
+        border-color: rgba(34, 197, 94, 0.4);
+        background: rgba(34, 197, 94, 0.1);
+      }
+      .bad {
+        border-color: rgba(239, 68, 68, 0.4);
+        background: rgba(239, 68, 68, 0.1);
+      }
+
+      .summary {
+        margin-top: 16px;
+      }
+      .winner {
+        font-size: 18px;
+        margin-top: 8px;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #020617;
+      }
+
+      .btns {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      button {
+        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: var(--accent2);
+        color: white;
+      }
+      button.secondary {
+        background: #111827;
+        border: 1px solid var(--border);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>מחשבון החלטה להשקעה</h1>
+      <div class="sub">
+        ציון סופי = תשואה אמיתית על עלות כוללת מינוס קנס סיכון
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>דירה 1</h3>
+          <div class="row">
+            <div class="field">
+              <label>מחיר</label
+              ><input id="price1" type="number" value="1350000" />
+            </div>
+            <div class="field">
+              <label>שכירות</label
+              ><input id="rent1" type="number" value="3600" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>עו"ד %</label
+              ><input id="lawyer1" type="number" value="0.5" />
+            </div>
+            <div class="field">
+              <label>מע"מ %</label><input id="vat1" type="number" value="18" />
+            </div>
+          </div>
+          <div class="field">
+            <label>תיווך %</label><input id="broker1" type="number" value="0" />
+          </div>
+          <div class="checks">
+            <label class="check"
+              ><input id="ground1" type="checkbox" /> קומת קרקע (-0.2%)</label
+            >
+            <label class="check"
+              ><input id="yard1" type="checkbox" /> חצר לא בטאבו (-0.3%)</label
+            >
+          </div>
+          <div class="result" id="result1"></div>
+        </div>
+
+        <div class="card">
+          <h3>דירה 2</h3>
+          <div class="row">
+            <div class="field">
+              <label>מחיר</label
+              ><input id="price2" type="number" value="1600000" />
+            </div>
+            <div class="field">
+              <label>שכירות</label
+              ><input id="rent2" type="number" value="4150" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>עו"ד %</label
+              ><input id="lawyer2" type="number" value="0.5" />
+            </div>
+            <div class="field">
+              <label>מע"מ %</label><input id="vat2" type="number" value="18" />
+            </div>
+          </div>
+          <div class="field">
+            <label>תיווך %</label
+            ><input id="broker2" type="number" value="1.5" />
+          </div>
+          <div class="checks">
+            <label class="check"
+              ><input id="ground2" type="checkbox" checked /> קומת קרקע
+              (-0.2%)</label
+            >
+            <label class="check"
+              ><input id="yard2" type="checkbox" checked /> חצר לא בטאבו
+              (-0.3%)</label
+            >
+          </div>
+          <div class="result" id="result2"></div>
+        </div>
+      </div>
+
+      <div class="summary card">
+        <div id="winner" class="winner"></div>
+        <div class="btns">
+          <button onclick="resetDefaults()">איפוס</button>
+          <button class="secondary" onclick="swap()">החלף בין הדירות</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const fmtP = (v) => v.toFixed(2) + "%";
+      const fmtN = (v) => new Intl.NumberFormat("he-IL").format(Math.round(v));
+
+      function calc(i) {
+        const price = +document.getElementById(`price${i}`).value || 0;
+        const rent = +document.getElementById(`rent${i}`).value || 0;
+        const lawyer =
+          (+document.getElementById(`lawyer${i}`).value || 0) / 100;
+        const vat = (+document.getElementById(`vat${i}`).value || 0) / 100;
+        const broker =
+          (+document.getElementById(`broker${i}`).value || 0) / 100;
+        const ground = document.getElementById(`ground${i}`).checked ? 0.2 : 0;
+        const yard = document.getElementById(`yard${i}`).checked ? 0.3 : 0;
+
+        const annual = rent * 12;
+        const lawyerCost = price * lawyer * (1 + vat);
+        const brokerCost = price * broker;
+        const total = price + lawyerCost + brokerCost;
+        const yield = total > 0 ? (annual / total) * 100 : 0;
+        const risk = ground + yard;
+        const score = yield - risk;
+
+        const el = document.getElementById(`result${i}`);
+        el.innerHTML = `
+      <span class="pill">שכ"ש: ${fmtN(annual)} ₪</span>
+      <span class="pill">עלות כניסה: ${fmtN(total)} ₪</span>
+      <span class="pill good">תשואה: ${fmtP(yield)}</span>
+      <span class="pill bad">קנס: ${fmtP(risk)}</span>
+      <div style="margin-top:6px;font-size:18px"><b>ציון סופי: ${fmtP(score)}</b></div>
+    `;
+        return score;
+      }
+
+      function update() {
+        const s1 = calc(1);
+        const s2 = calc(2);
+        const w = document.getElementById("winner");
+        if (s1 > s2) w.textContent = "דירה 1 עדיפה לפי ציון משוקלל";
+        else if (s2 > s1) w.textContent = "דירה 2 עדיפה לפי ציון משוקלל";
+        else w.textContent = "התוצאה זהה בקירוב";
+      }
+
+      function resetDefaults() {
+        document.getElementById("price1").value = 1350000;
+        document.getElementById("rent1").value = 3600;
+        document.getElementById("lawyer1").value = 0.5;
+        document.getElementById("vat1").value = 18;
+        document.getElementById("broker1").value = 0;
+        document.getElementById("ground1").checked = false;
+        document.getElementById("yard1").checked = false;
+
+        document.getElementById("price2").value = 1600000;
+        document.getElementById("rent2").value = 4150;
+        document.getElementById("lawyer2").value = 0.5;
+        document.getElementById("vat2").value = 18;
+        document.getElementById("broker2").value = 1.5;
+        document.getElementById("ground2").checked = true;
+        document.getElementById("yard2").checked = true;
+        update();
+      }
+
+      function swap() {
+        ["price", "rent", "lawyer", "vat", "broker", "ground", "yard"].forEach(
+          (k) => {
+            const a = document.getElementById(k + "1");
+            const b = document.getElementById(k + "2");
+            if (a.type === "checkbox") {
+              const t = a.checked;
+              a.checked = b.checked;
+              b.checked = t;
+            } else {
+              const t = a.value;
+              a.value = b.value;
+              b.value = t;
+            }
+          },
+        );
+        update();
+      }
+
+      document
+        .querySelectorAlבl("input")
+        .forEach((i) => i.addEventListener("input", update));
+      update();
+    </script>
+  </body>
+</html>
