@@ -269,6 +269,12 @@ function computeMetrics(data) {
   const totalCashNeeded = minEquityForBank + extraCosts - totalLoanAmounts;
   const balance = equitySum - totalCashNeeded;
 
+  // How much more must be financed beyond the equity allocated here.
+  // (total cost incl. lawyer + agent + tax, minus my equity and private loans)
+  const financingNeeded = Math.max(totalCost - equitySum - totalLoanAmounts, 0);
+  // What is still uncovered after the mortgage is applied.
+  const financingGap = Math.max(financingNeeded - mortgageSum, 0);
+
   const currentLTV = apartmentPrice > 0 ? (mortgageSum / apartmentPrice) * 100 : 0;
   const ltvOk = currentLTV <= 75;
 
@@ -299,6 +305,7 @@ function computeMetrics(data) {
     brokerFee, purchaseTax, totalCost, totalSources, totalLoanAmounts,
     lawyerFee,
     maxMortgage, minEquityForBank, extraCosts, totalCashNeeded, balance,
+    financingNeeded, financingGap,
     currentLTV, ltvOk, monthlyMortgage, totalInterest, totalRepay,
     totalLoanMonthly, totalMonthly,
     monthlyRent, annualRent, annualFinancing, yearlyProfit, monthlyCashFlow, grossYield,
@@ -328,6 +335,12 @@ function updateAll() {
   setText("equity-remaining", fmt(remaining));
   const remEl = document.getElementById("equity-remaining");
   if (remEl) remEl.className = "num " + (remaining < 0 ? "num-warn" : "");
+
+  // How much more financing is needed for THIS apartment (mortgage + fees)
+  setText("financing-needed", fmt(m.financingNeeded));
+  setText("financing-gap", fmt(m.financingGap));
+  const gapEl = document.getElementById("financing-gap");
+  if (gapEl) gapEl.className = "num " + (m.financingGap > 0 ? "num-warn" : "num-positive");
 
   setText("sum_purchase", fmt(m.purchaseSum));
   setText("sum_renovation", fmt(m.renoSum));

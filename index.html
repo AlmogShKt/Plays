@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="real-estate-calc.css?v=3" />
+    <link rel="stylesheet" href="real-estate-calc.css?v=4" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   </head>
   <body>
@@ -274,6 +274,18 @@
                     <input type="number" id="monthly-rent" value="0" oninput="updateAll()" />
                     <span class="currency-tag">₪</span>
                   </div>
+                </div>
+              </div>
+              <div class="financing-banner">
+                <div class="financing-item">
+                  <span class="financing-label">נדרש מימון נוסף (משכנתא + עלויות)</span>
+                  <span class="financing-value num" id="financing-needed">0 ₪</span>
+                  <span class="financing-hint">עלות כוללת פחות ההון המוקצה וההלוואות</span>
+                </div>
+                <div class="financing-item">
+                  <span class="financing-label">חסר לכיסוי מלא (אחרי משכנתא)</span>
+                  <span class="financing-value num" id="financing-gap">0 ₪</span>
+                  <span class="financing-hint">כמה עוד חסר אחרי המשכנתא שהוזנה</span>
                 </div>
               </div>
               <div class="mortgage-results">
@@ -583,6 +595,6 @@
       </div>
     </div>
 
-    <script src="real-estate-calc.js?v=3"></script>
+    <script src="real-estate-calc.js?v=4"></script>
   </body>
 </html>
