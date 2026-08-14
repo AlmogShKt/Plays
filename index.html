@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="real-estate-calc.css?v=4" />
+    <link rel="stylesheet" href="real-estate-calc.css?v=5" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   </head>
   <body>
@@ -278,9 +278,19 @@
               </div>
               <div class="financing-banner">
                 <div class="financing-item">
-                  <span class="financing-label">נדרש מימון נוסף (משכנתא + עלויות)</span>
+                  <span class="financing-label">משכנתא נדרשת</span>
+                  <span class="financing-value num" id="financing-mortgage">0 ₪</span>
+                  <span class="financing-hint">מחיר הדירה פחות ההון וההלוואות</span>
+                </div>
+                <div class="financing-item">
+                  <span class="financing-label">עלויות נוספות</span>
+                  <span class="financing-value num" id="financing-other">0 ₪</span>
+                  <span class="financing-hint">שיפוץ, עו״ד, תיווך ומס רכישה</span>
+                </div>
+                <div class="financing-item financing-total">
+                  <span class="financing-label">סה״כ מימון נדרש</span>
                   <span class="financing-value num" id="financing-needed">0 ₪</span>
-                  <span class="financing-hint">עלות כוללת פחות ההון המוקצה וההלוואות</span>
+                  <span class="financing-hint">משכנתא + עלויות נוספות</span>
                 </div>
                 <div class="financing-item">
                   <span class="financing-label">חסר לכיסוי מלא (אחרי משכנתא)</span>
@@ -595,6 +605,6 @@
       </div>
     </div>
 
-    <script src="real-estate-calc.js?v=4"></script>
+    <script src="real-estate-calc.js?v=5"></script>
   </body>
 </html>

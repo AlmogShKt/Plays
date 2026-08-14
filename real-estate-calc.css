@@ -1102,7 +1102,7 @@ body {
 
 .financing-banner {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -1114,6 +1114,10 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--teal-light);
+}
+.financing-item.financing-total {
+  border-color: var(--teal);
+  background: var(--teal-surface);
 }
 .financing-label {
   font-size: 0.8em;
@@ -1129,6 +1133,11 @@ body {
   color: var(--ink-muted);
 }
 
+@media (max-width: 900px) {
+  .financing-banner {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 @media (max-width: 640px) {
   .financing-banner {
     grid-template-columns: 1fr;

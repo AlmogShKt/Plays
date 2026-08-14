@@ -270,8 +270,12 @@ function computeMetrics(data) {
   const balance = equitySum - totalCashNeeded;
 
   // How much more must be financed beyond the equity allocated here.
-  // (total cost incl. lawyer + agent + tax, minus my equity and private loans)
-  const financingNeeded = Math.max(totalCost - equitySum - totalLoanAmounts, 0);
+  // Split into: mortgage needed for the price, and the other costs (fees + tax + reno).
+  const fundsAvailable = equitySum + totalLoanAmounts; // equity + private loans
+  const mortgageNeeded = Math.max(apartmentPrice - fundsAvailable, 0);
+  const leftoverAfterPrice = Math.max(fundsAvailable - apartmentPrice, 0);
+  const otherNeeded = Math.max(extraCosts - leftoverAfterPrice, 0); // reno + broker + lawyer + tax
+  const financingNeeded = mortgageNeeded + otherNeeded;
   // What is still uncovered after the mortgage is applied.
   const financingGap = Math.max(financingNeeded - mortgageSum, 0);
 
@@ -305,7 +309,7 @@ function computeMetrics(data) {
     brokerFee, purchaseTax, totalCost, totalSources, totalLoanAmounts,
     lawyerFee,
     maxMortgage, minEquityForBank, extraCosts, totalCashNeeded, balance,
-    financingNeeded, financingGap,
+    financingNeeded, financingGap, mortgageNeeded, otherNeeded,
     currentLTV, ltvOk, monthlyMortgage, totalInterest, totalRepay,
     totalLoanMonthly, totalMonthly,
     monthlyRent, annualRent, annualFinancing, yearlyProfit, monthlyCashFlow, grossYield,
@@ -336,7 +340,9 @@ function updateAll() {
   const remEl = document.getElementById("equity-remaining");
   if (remEl) remEl.className = "num " + (remaining < 0 ? "num-warn" : "");
 
-  // How much more financing is needed for THIS apartment (mortgage + fees)
+  // How much more financing is needed for THIS apartment, split into parts
+  setText("financing-mortgage", fmt(m.mortgageNeeded));
+  setText("financing-other", fmt(m.otherNeeded));
   setText("financing-needed", fmt(m.financingNeeded));
   setText("financing-gap", fmt(m.financingGap));
   const gapEl = document.getElementById("financing-gap");
