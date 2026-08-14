@@ -300,15 +300,16 @@ function computeMetrics(data) {
   const totalCashNeeded = minEquityForBank + extraCosts - totalLoanAmounts;
   const balance = equitySum - totalCashNeeded;
 
-  // How much more must be financed beyond the equity allocated here.
-  // Split into: mortgage needed for the price, and the other costs (fees + tax + reno).
-  const fundsAvailable = equitySum + totalLoanAmounts; // equity + private loans
-  const mortgageNeeded = Math.max(apartmentPrice - fundsAvailable, 0);
-  const leftoverAfterPrice = Math.max(fundsAvailable - apartmentPrice, 0);
-  const otherNeeded = Math.max(extraCosts - leftoverAfterPrice, 0); // reno + broker + lawyer + tax
-  const financingNeeded = mortgageNeeded + otherNeeded;
-  // What is still uncovered after the mortgage is applied.
-  const financingGap = Math.max(financingNeeded - mortgageSum, 0);
+  // Transaction costs must be paid from cash first; only the remaining equity
+  // is available as the apartment down payment. The mortgage covers the rest
+  // of the apartment price (subject to the LTV limit below).
+  const fundsAvailable = equitySum + totalLoanAmounts;
+  const equityAfterCosts = Math.max(fundsAvailable - extraCosts, 0);
+  const uncoveredCosts = Math.max(extraCosts - fundsAvailable, 0);
+  const mortgageNeeded = Math.max(apartmentPrice - equityAfterCosts, 0);
+  const otherNeeded = extraCosts;
+  const financingNeeded = mortgageNeeded;
+  const financingGap = Math.max(mortgageNeeded + uncoveredCosts - mortgageSum, 0);
 
   const currentLTV = apartmentPrice > 0 ? (mortgageSum / apartmentPrice) * 100 : 0;
   const ltvOk = currentLTV <= 75;
@@ -349,7 +350,7 @@ function computeMetrics(data) {
     brokerFee, purchaseTax, totalCost, totalSources, totalLoanAmounts,
     lawyerFee,
     maxMortgage, minEquityForBank, extraCosts, totalCashNeeded, balance,
-    financingNeeded, financingGap, mortgageNeeded, otherNeeded,
+    financingNeeded, financingGap, mortgageNeeded, otherNeeded, equityAfterCosts, uncoveredCosts,
     currentLTV, ltvOk, monthlyMortgage, totalInterest, totalRepay,
     totalLoanMonthly, totalMonthly,
     monthlyRent, annualRent, annualOperatingExpenses, annualDebtPayments, annualInterest, annualPrincipal,
@@ -365,8 +366,17 @@ function setText(id, value) {
 // ── Render live view from current DOM ──
 function updateAll() {
   syncSharedEquityFromDOM();
-  const data = collectData();
-  const m = computeMetrics(data);
+  let data = collectData();
+  let m = computeMetrics(data);
+
+  // The allocated equity pays transaction costs first. Automatically use the
+  // remaining apartment-price balance as the mortgage in the simulator.
+  const mortgageAmountEl = document.getElementById("m_amount");
+  if (mortgageAmountEl && Math.abs((parseFloat(mortgageAmountEl.value) || 0) - m.mortgageNeeded) >= 1) {
+    mortgageAmountEl.value = Math.round(m.mortgageNeeded);
+    data = collectData();
+    m = computeMetrics(data);
+  }
   const fmt = (n) => Math.round(n).toLocaleString() + " ₪";
   const fmtShort = (n) => Math.round(n).toLocaleString();
 
@@ -383,7 +393,8 @@ function updateAll() {
 
   // How much more financing is needed for THIS apartment, split into parts
   setText("financing-mortgage", fmt(m.mortgageNeeded));
-  setText("financing-other", fmt(m.otherNeeded));
+  setText("financing-costs", fmt(m.extraCosts));
+  setText("financing-other", fmt(m.equityAfterCosts));
   setText("financing-needed", fmt(m.financingNeeded));
   setText("financing-gap", fmt(m.financingGap));
   const gapEl = document.getElementById("financing-gap");
