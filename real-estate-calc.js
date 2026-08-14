@@ -366,17 +366,8 @@ function setText(id, value) {
 // ── Render live view from current DOM ──
 function updateAll() {
   syncSharedEquityFromDOM();
-  let data = collectData();
-  let m = computeMetrics(data);
-
-  // The allocated equity pays transaction costs first. Automatically use the
-  // remaining apartment-price balance as the mortgage in the simulator.
-  const mortgageAmountEl = document.getElementById("m_amount");
-  if (mortgageAmountEl && Math.abs((parseFloat(mortgageAmountEl.value) || 0) - m.mortgageNeeded) >= 1) {
-    mortgageAmountEl.value = Math.round(m.mortgageNeeded);
-    data = collectData();
-    m = computeMetrics(data);
-  }
+  const data = collectData();
+  const m = computeMetrics(data);
   const fmt = (n) => Math.round(n).toLocaleString() + " ₪";
   const fmtShort = (n) => Math.round(n).toLocaleString();
 
