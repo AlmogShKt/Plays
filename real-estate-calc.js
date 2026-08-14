@@ -31,6 +31,7 @@ function blankData() {
     loans: [],
     equityAllocated: 0,
     monthlyRent: 0,
+    annualOperatingExpenses: 0,
     brokerEnabled: true,
     lawyerEnabled: true,
   };
@@ -189,10 +190,40 @@ function addLoanRowWithData(description, amount, rate, months) {
 }
 
 function calculateLoanPayment(amount, annualRate, months) {
-  if (!amount || !annualRate || !months) return 0;
+  if (!amount || !months) return 0;
   const r = annualRate / 100 / 12;
   const n = months;
+  if (!r) return amount / n;
   return (amount * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1);
+}
+
+// Split the first year's payments into true financing cost (interest) and
+// debt reduction (principal). Principal is cash outflow, but not an expense.
+function calculateFirstYearBreakdown(amount, annualRate, months) {
+  const principal = parseFloat(amount) || 0;
+  const n = parseFloat(months) || 0;
+  if (!principal || !n) return { payments: 0, interest: 0, principal: 0 };
+
+  const payment = calculateLoanPayment(principal, annualRate, n);
+  const monthlyRate = (parseFloat(annualRate) || 0) / 100 / 12;
+  const paymentCount = Math.min(12, n);
+  let balance = principal;
+  let interestPaid = 0;
+  let principalPaid = 0;
+
+  for (let month = 0; month < paymentCount; month += 1) {
+    const interest = balance * monthlyRate;
+    const principalPart = Math.min(payment - interest, balance);
+    interestPaid += interest;
+    principalPaid += principalPart;
+    balance -= principalPart;
+  }
+
+  return {
+    payments: interestPaid + principalPaid,
+    interest: interestPaid,
+    principal: principalPaid,
+  };
 }
 
 function collectLoanRows() {
@@ -283,25 +314,34 @@ function computeMetrics(data) {
   const ltvOk = currentLTV <= 75;
 
   const monthlyMortgage = calculateLoanPayment(mortgageSum, mRate, mYears * 12);
+  const mortgageYearOne = calculateFirstYearBreakdown(mortgageSum, mRate, mYears * 12);
   const totalRepay = monthlyMortgage * mYears * 12;
   const totalInterest = Math.max(totalRepay - mortgageSum, 0);
 
   let totalLoanMonthly = 0;
+  let loanYearOneInterest = 0;
+  let loanYearOnePrincipal = 0;
   (data.loans || []).forEach((l) => {
     totalLoanMonthly += calculateLoanPayment(
       parseFloat(l.amount) || 0,
       parseFloat(l.rate) || 0,
       parseFloat(l.months) || 0,
     );
+    const breakdown = calculateFirstYearBreakdown(l.amount, l.rate, l.months);
+    loanYearOneInterest += breakdown.interest;
+    loanYearOnePrincipal += breakdown.principal;
   });
   const totalMonthly = monthlyMortgage + totalLoanMonthly;
 
   // ── Rental & yearly profit ──
   const monthlyRent = parseFloat(data.monthlyRent) || 0;
+  const annualOperatingExpenses = parseFloat(data.annualOperatingExpenses) || 0;
   const annualRent = monthlyRent * 12;
-  const annualFinancing = totalMonthly * 12;
-  const yearlyProfit = annualRent - annualFinancing;
-  const monthlyCashFlow = monthlyRent - totalMonthly;
+  const annualDebtPayments = totalMonthly * 12;
+  const annualInterest = mortgageYearOne.interest + loanYearOneInterest;
+  const annualPrincipal = mortgageYearOne.principal + loanYearOnePrincipal;
+  const economicProfit = annualRent - annualInterest - annualOperatingExpenses;
+  const monthlyCashFlow = monthlyRent - totalMonthly - annualOperatingExpenses / 12;
   const grossYield = apartmentPrice > 0 ? (annualRent / apartmentPrice) * 100 : 0;
 
   return {
@@ -312,7 +352,8 @@ function computeMetrics(data) {
     financingNeeded, financingGap, mortgageNeeded, otherNeeded,
     currentLTV, ltvOk, monthlyMortgage, totalInterest, totalRepay,
     totalLoanMonthly, totalMonthly,
-    monthlyRent, annualRent, annualFinancing, yearlyProfit, monthlyCashFlow, grossYield,
+    monthlyRent, annualRent, annualOperatingExpenses, annualDebtPayments, annualInterest, annualPrincipal,
+    economicProfit, yearlyProfit: economicProfit, monthlyCashFlow, grossYield,
   };
 }
 
@@ -415,21 +456,31 @@ function updateAll() {
 
   // ── Rental & yearly profit ──
   setText("annual_rent", fmt(m.annualRent));
-  setText("annual_financing", fmt(m.annualFinancing));
-  setText("yearly_profit", fmt(m.yearlyProfit));
+  setText("annual_financing", fmt(m.annualInterest));
+  setText("annual_principal", fmt(m.annualPrincipal));
+  setText("annual_operating", fmt(m.annualOperatingExpenses));
+  setText("yearly_profit", fmt(m.economicProfit));
   setText("monthly_cashflow", fmt(m.monthlyCashFlow));
   setText("gross_yield", m.grossYield.toFixed(2) + "%");
-  setText("sum_yearly_profit", fmt(m.yearlyProfit));
+  setText("sum_yearly_profit", fmt(m.economicProfit));
   ["yearly_profit", "monthly_cashflow", "sum_yearly_profit"].forEach((id) => {
     const el = document.getElementById(id);
-    if (el) el.classList.toggle("num-negative", m.yearlyProfit < 0 && id !== "monthly_cashflow");
+    if (el) el.classList.toggle("num-negative", m.economicProfit < 0 && id !== "monthly_cashflow");
   });
   const cfEl = document.getElementById("monthly_cashflow");
   if (cfEl) cfEl.classList.toggle("num-negative", m.monthlyCashFlow < 0);
   const ypEl = document.getElementById("yearly_profit");
   if (ypEl) {
-    ypEl.classList.toggle("num-positive", m.yearlyProfit >= 0);
-    ypEl.classList.toggle("num-negative", m.yearlyProfit < 0);
+    ypEl.classList.toggle("num-positive", m.economicProfit >= 0);
+    ypEl.classList.toggle("num-negative", m.economicProfit < 0);
+  }
+  const profitabilityEl = document.getElementById("profitability_status");
+  if (profitabilityEl) {
+    const profitable = m.economicProfit >= 0;
+    profitabilityEl.textContent = profitable
+      ? `רווחית כלכלית: ${fmt(m.economicProfit)} בשנה לפני שינוי בשווי הדירה`
+      : `מפסידה כלכלית: ${fmt(Math.abs(m.economicProfit))} בשנה לפני שינוי בשווי הדירה`;
+    profitabilityEl.className = "profitability-status " + (profitable ? "positive" : "negative");
   }
 }
 
@@ -463,6 +514,7 @@ function collectData() {
     loans: collectLoanRows(),
     equityAllocated: parseFloat(document.getElementById("equity-allocated")?.value) || 0,
     monthlyRent: parseFloat(document.getElementById("monthly-rent")?.value) || 0,
+    annualOperatingExpenses: parseFloat(document.getElementById("annual-operating-expenses")?.value) || 0,
     brokerEnabled: brokerToggle ? brokerToggle.checked : true,
     lawyerEnabled: lawyerToggle ? lawyerToggle.checked : true,
   };
@@ -504,6 +556,8 @@ function restoreData(data) {
   if (allocEl) allocEl.value = data.equityAllocated || 0;
   const rentEl = document.getElementById("monthly-rent");
   if (rentEl) rentEl.value = data.monthlyRent || 0;
+  const operatingEl = document.getElementById("annual-operating-expenses");
+  if (operatingEl) operatingEl.value = data.annualOperatingExpenses || 0;
 
   const mortgage = data.mortgage || {};
   document.getElementById("m_amount").value = mortgage.amount || 0;
@@ -721,7 +775,7 @@ function openCompare() {
     { label: "סה״כ החזר חודשי", key: "totalMonthly", better: "low" },
     { label: "שכר דירה חודשי", key: "monthlyRent", better: "high" },
     { label: "תזרים חודשי (שכ״ד − החזר)", key: "monthlyCashFlow", better: "high" },
-    { label: "רווח שנתי", key: "yearlyProfit", better: "high" },
+    { label: "רווח כלכלי שנתי (שכ״ד − ריבית − תפעול)", key: "yearlyProfit", better: "high" },
     { label: "תשואה ברוטו", key: "grossYield", better: "high", pct: true },
     { label: "LTV", key: "currentLTV", better: null, pct: true },
   ];

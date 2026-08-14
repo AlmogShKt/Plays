@@ -571,6 +571,12 @@ body {
   margin-bottom: 5px;
   letter-spacing: 0.01em;
 }
+.field-hint {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.7em;
+  color: var(--ink-muted);
+}
 
 .mortgage-results {
   display: grid;
@@ -609,6 +615,27 @@ body {
   font-size: 0.68em;
   color: var(--ink-muted);
   margin-top: 2px;
+}
+
+.profitability-status {
+  margin-top: 14px;
+  padding: 13px 16px;
+  border-radius: var(--radius);
+  text-align: center;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  background: var(--navy-light);
+  color: var(--ink-muted);
+}
+.profitability-status.positive {
+  color: var(--green);
+  background: var(--teal-light);
+  border-color: var(--teal);
+}
+.profitability-status.negative {
+  color: var(--red);
+  background: var(--red-light);
+  border-color: var(--red);
 }
 
 /* ═══════════════════════════════════════

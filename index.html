@@ -275,6 +275,14 @@
                     <span class="currency-tag">₪</span>
                   </div>
                 </div>
+                <div class="m-field">
+                  <label for="annual-operating-expenses">הוצאות תפעול שנתיות</label>
+                  <div class="amount-wrap">
+                    <input type="number" id="annual-operating-expenses" value="0" oninput="updateAll()" />
+                    <span class="currency-tag">₪</span>
+                  </div>
+                  <span class="field-hint">ביטוח, תיקונים וריקנות — ללא משכנתא</span>
+                </div>
               </div>
               <div class="financing-banner">
                 <div class="financing-item">
@@ -304,11 +312,19 @@
                   <span class="m-result-value" id="annual_rent">0 ₪</span>
                 </div>
                 <div class="m-result-item">
-                  <span class="m-result-label">עלות מימון שנתית</span>
+                  <span class="m-result-label">ריבית בשנה הראשונה</span>
                   <span class="m-result-value" id="annual_financing">0 ₪</span>
                 </div>
                 <div class="m-result-item">
-                  <span class="m-result-label">רווח שנתי</span>
+                  <span class="m-result-label">החזר קרן בשנה הראשונה</span>
+                  <span class="m-result-value" id="annual_principal">0 ₪</span>
+                </div>
+                <div class="m-result-item">
+                  <span class="m-result-label">הוצאות תפעול שנתיות</span>
+                  <span class="m-result-value" id="annual_operating">0 ₪</span>
+                </div>
+                <div class="m-result-item">
+                  <span class="m-result-label">רווח כלכלי לפני הוצאות תפעול</span>
                   <span class="m-result-value" id="yearly_profit">0 ₪</span>
                 </div>
                 <div class="m-result-item">
@@ -320,6 +336,7 @@
                   <span class="m-result-value" id="gross_yield">0%</span>
                 </div>
               </div>
+              <div class="profitability-status" id="profitability_status">הזן נתונים לבדיקת רווחיות</div>
             </div>
           </section>
 
@@ -557,7 +574,7 @@
             <div class="summary-group">
               <div class="summary-group-label">תשואה שנתית</div>
               <div class="summary-row total-row">
-                <span>רווח שנתי (שכ״ד − מימון)</span>
+                <span>רווח כלכלי (שכ״ד − ריבית, לפני תפעול)</span>
                 <span class="num" id="sum_yearly_profit">0 ₪</span>
               </div>
             </div>
