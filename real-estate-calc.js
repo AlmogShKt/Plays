@@ -300,16 +300,15 @@ function computeMetrics(data) {
   const totalCashNeeded = minEquityForBank + extraCosts - totalLoanAmounts;
   const balance = equitySum - totalCashNeeded;
 
-  // Transaction costs must be paid from cash first; only the remaining equity
-  // is available as the apartment down payment. The mortgage covers the rest
-  // of the apartment price (subject to the LTV limit below).
+  // Transaction costs (fees + tax + reno) are paid from cash first; the
+  // remaining equity is the apartment down payment, and the mortgage covers the
+  // rest of the price. "Other" = any costs the equity couldn't cover.
   const fundsAvailable = equitySum + totalLoanAmounts;
   const equityAfterCosts = Math.max(fundsAvailable - extraCosts, 0);
-  const uncoveredCosts = Math.max(extraCosts - fundsAvailable, 0);
+  const otherNeeded = Math.max(extraCosts - fundsAvailable, 0);
   const mortgageNeeded = Math.max(apartmentPrice - equityAfterCosts, 0);
-  const otherNeeded = extraCosts;
-  const financingNeeded = mortgageNeeded;
-  const financingGap = Math.max(mortgageNeeded + uncoveredCosts - mortgageSum, 0);
+  const financingNeeded = mortgageNeeded + otherNeeded;
+  const financingGap = Math.max(financingNeeded - mortgageSum, 0);
 
   const currentLTV = apartmentPrice > 0 ? (mortgageSum / apartmentPrice) * 100 : 0;
   const ltvOk = currentLTV <= 75;
@@ -350,7 +349,7 @@ function computeMetrics(data) {
     brokerFee, purchaseTax, totalCost, totalSources, totalLoanAmounts,
     lawyerFee,
     maxMortgage, minEquityForBank, extraCosts, totalCashNeeded, balance,
-    financingNeeded, financingGap, mortgageNeeded, otherNeeded, equityAfterCosts, uncoveredCosts,
+    financingNeeded, financingGap, mortgageNeeded, otherNeeded, equityAfterCosts,
     currentLTV, ltvOk, monthlyMortgage, totalInterest, totalRepay,
     totalLoanMonthly, totalMonthly,
     monthlyRent, annualRent, annualOperatingExpenses, annualDebtPayments, annualInterest, annualPrincipal,
